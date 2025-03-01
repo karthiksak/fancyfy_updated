@@ -31,6 +31,20 @@
             margin: 0;
             font-size: 2.5rem;
         }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo {
+            background: #ffd700;
+            border-radius: -200%;
+            padding: 10px;
+            margin-right: 15px;
+        }
+        .logo img {
+            max-height: 60px;
+        }
         .message {
             font-size: 1.2rem;
             margin-top: 123px;
@@ -133,11 +147,30 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Fancyfy Accessories</h1>
+    <%-- <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Fancyfy Logo">
+            </div>
+            <h1>Fancyfy Accessories</h1>
+        </div>
         <div id="messages" style="color: aquamarine;" class="message"></div>
     </div>
-    
+     --%>
+     
+    <div class="header">
+    <div class="logo-container" style="display: flex; flex-direction: column; align-items: center; gap: 90px;">
+        <div class="logo">
+            <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Fancyfy Logo">
+        </div>
+        <div>
+            <h1>Fancyfy Accessories</h1>
+        </div>
+    </div>
+    <div id="messages" style="color: aquamarine;" class="message"></div>
+</div>
+
+     
     <div class="container mt-4">
         <h2 class="text-center">Product Listing</h2>
         <div class="row">
@@ -170,7 +203,7 @@
                         </div>
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text">${product.description}</p>
+                           <%--  <p class="card-text">${product.description}</p> --%>
                             <p><strong>Price:</strong> ₹${product.price}</p>
                             <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}" class="btn btn-primary">View Details</a>
                             <form action="${pageContext.request.contextPath}/add-to-cart" method="post" class="mt-2">
@@ -222,9 +255,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const messages = [
-                "50% Off on All Accessories!",
-                "Buy One Get One Free!",
-                "Free Shipping on Orders Over ₹50!"
+                "Never compromise on quality",
+                "use coupen FANCYFY50, when purchasing above 399",
+                "Free Shipping on Orders Over ₹499!"
             ];
             let index = 0;
             const messageContainer = document.getElementById('messages');

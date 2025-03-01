@@ -67,7 +67,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="images/banner.jpg" alt="Fancyfy Accessories Banner" class="img-fluid">
+        <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Fancyfy Logo" class="img-fluid" style="max-height: 60px;">
         <h1>Fancyfy Accessories</h1>
     </div>
 
@@ -102,7 +102,10 @@
             </div>
         </div>
     </div>
-
+<br></br>
+<br></br>
+<br></br>
+<br></br>
     <footer>
         <p>&copy; 2025 Fancyfy Accessories. All rights reserved.</p>
     </footer>

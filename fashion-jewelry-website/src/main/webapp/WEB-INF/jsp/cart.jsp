@@ -1,8 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart - Fancyfy Accessories</title>
     
     <!-- Bootstrap CSS -->
@@ -64,6 +66,7 @@
 </head>
 <body>
     <div class="header">
+        <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Fancyfy Logo" class="img-fluid" style="max-height: 60px;">
         <h1>Shopping Cart</h1>
     </div>
 
