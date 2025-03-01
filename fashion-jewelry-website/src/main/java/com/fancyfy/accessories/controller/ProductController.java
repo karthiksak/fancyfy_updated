@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(urlPatterns = { "/products", "/product-detail", "/product-form", "/index", "/add-product",
-		"/manage-products", "/delete-product", "/update-quantity", "/add-to-cart", "/view-cart", "/checkout",
-		"/place-order","/order-confirmation" })
+        "/manage-products", "/delete-product", "/update-quantity", "/add-to-cart", "/view-cart", "/checkout",
+        "/place-order","/order-confirmation", "/clear-cart" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
 		maxFileSize = 1024 * 1024 * 10, // 10MB
 		maxRequestSize = 1024 * 1024 * 50) // 50MB
@@ -65,33 +65,36 @@ public class ProductController extends HttpServlet {
 			throws ServletException, IOException {
 		String action = request.getServletPath();
 
-		switch (action) {
-		case "/index":
-			index(request, response);
-			break;
-		case "/order-confirmation":
-			orderconfirmation(request, response);
-			break;
-		case "/delete-product":
-			deleteProduct(request, response);
-			break;
-		case "/add-product":
-			addProduct(request, response);
-			break;
-		case "/update-quantity":
-			updateQuantity(request, response);
-			break;
-		case "/add-to-cart":
-			addToCart(request, response);
-			break;
-		case "/checkout":
-			checkout(request, response);
-			break;
-		case "/place-order":
-			placeOrder(request, response);
-			break;
-		}
-	}
+        switch (action) {
+            case "/index":
+                index(request, response);
+                break;
+            case "/order-confirmation":
+                orderconfirmation(request, response);
+                break;
+            case "/delete-product":
+                deleteProduct(request, response);
+                break;
+            case "/add-product":
+                addProduct(request, response);
+                break;
+            case "/update-quantity":
+                updateQuantity(request, response);
+                break;
+            case "/add-to-cart":
+                addToCart(request, response);
+                break;
+            case "/checkout":
+                checkout(request, response);
+                break;
+            case "/place-order":
+                placeOrder(request, response);
+                break;
+            case "/clear-cart":
+                clearCart(request, response);
+                break;
+        }
+    }
 
 	private void listProducts(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -210,32 +213,54 @@ public class ProductController extends HttpServlet {
 		Product product = productDao.selectProductById(productId);
 		cart.addProduct(product, quantity);
 
-		response.sendRedirect("view-cart");
-	}
+        response.sendRedirect("products");
+    }
 
-	private void viewCart(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		request.getRequestDispatcher("WEB-INF/jsp/cart.jsp").forward(request, response);
-	}
+    private void viewCart(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new Cart();
+            session.setAttribute("cart", cart);
+        }
+        request.getRequestDispatcher("WEB-INF/jsp/cart.jsp").forward(request, response);
+    }
 
 	private void orderconfirmation(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		request.getRequestDispatcher("WEB-INF/jsp/order-confirmation.jsp").forward(request, response);
 	}
 
-	private void checkout(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		request.getRequestDispatcher("WEB-INF/jsp/checkout.jsp").forward(request, response);
-	}
+    private void checkout(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new Cart();
+            session.setAttribute("cart", cart);
+        }
+        request.getRequestDispatcher("WEB-INF/jsp/checkout.jsp").forward(request, response);
+    }
 
-	private void placeOrder(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		Cart cart = (Cart) session.getAttribute("cart");
-		if (cart != null) {
-			// Handle order placement logic (e.g., save order details to the database)
-			cart.clear();
-		}
-		request.getRequestDispatcher("WEB-INF/jsp/order-confirmation.jsp").forward(request, response);
-	}
+    private void placeOrder(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart != null) {
+            // Handle order placement logic (e.g., save order details to the database)
+            cart.clear();
+        }
+        request.getRequestDispatcher("WEB-INF/jsp/order-confirmation.jsp").forward(request, response);
+    }
+
+    private void clearCart(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart != null) {
+            cart.clear();
+        }
+        response.sendRedirect("products");
+    }
 }

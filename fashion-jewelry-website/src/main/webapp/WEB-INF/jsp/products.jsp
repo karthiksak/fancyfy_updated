@@ -31,10 +31,6 @@
             margin: 0;
             font-size: 2.5rem;
         }
-        .header {
-            font-size: 1.2rem;
-            margin-top: 10px;
-        }
         .message {
             font-size: 1.2rem;
             margin-top: 123px;
@@ -85,6 +81,55 @@
         .btn-primary:hover {
             background-color: #e6c200;
         }
+        .floating-cart-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffd700;
+            color: #1f1f1f;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            cursor: pointer;
+        }
+        .floating-cart-btn:hover {
+            background-color: #e6c200;
+        }
+        .floating-cart {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: #1f1f1f;
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        .floating-cart h4 {
+            margin-bottom: 20px;
+        }
+        .floating-cart .cart-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .floating-cart .cart-item:last-child {
+            border-bottom: none;
+        }
+        .floating-cart .cart-item p {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +149,7 @@
                         </div>
                     </div>
                 </c:if>
-                <div class="col-md-4 col-sm-6 mb-4">
+                <div class="col-md-4 col-sm-6 col-12 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div id="carousel-${product.id}" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
@@ -126,7 +171,7 @@
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text">${product.description}</p>
-                            <p><strong>Price:</strong> INR ${product.price}</p>
+                            <p><strong>Price:</strong> ₹${product.price}</p>
                             <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}" class="btn btn-primary">View Details</a>
                             <form action="${pageContext.request.contextPath}/add-to-cart" method="post" class="mt-2">
                                 <input type="hidden" name="productId" value="${product.id}">
@@ -138,6 +183,34 @@
                 </div>
             </c:forEach>
         </div>
+    </div>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
+    <button class="floating-cart-btn" id="floatingCartBtn">
+     <%--    <img src="${pageContext.request.contextPath}/images/cart-icon.png" alt="Cart" width="30"> --%>
+	<span style="font-size: 24px;">🛒</span>
+	   
+    </button>
+
+    <div class="floating-cart" id="floatingCart">
+        <h4>Your Cart</h4>
+        <div id="cartItems">
+            <c:forEach var="entry" items="${cart.items}">
+                <div class="cart-item">
+                    <p><strong>${entry.key.name}</strong></p>
+                    <p>Quantity: ${entry.value}</p>
+                    <p>Price: ₹${entry.key.price}</p>
+                    <p>Total: ₹${entry.key.price * entry.value}</p>
+                </div>
+            </c:forEach>
+        </div>
+        <p><strong>Total Amount: ₹${cart.totalAmount}</strong></p>
+        <p><strong>Shipping Charge: ₹${cart.shippingCharge}</strong></p>
+        <p><strong>Final Amount: ₹${cart.finalAmount}</strong></p>
+        <button class="btn btn-danger" id="clearCart">Clear Cart</button>
+        <a href="${pageContext.request.contextPath}/view-cart" class="btn btn-primary mt-2">Go to Checkout</a>
     </div>
     
     <footer>
@@ -151,7 +224,7 @@
             const messages = [
                 "50% Off on All Accessories!",
                 "Buy One Get One Free!",
-                "Free Shipping on Orders Over RS50!"
+                "Free Shipping on Orders Over ₹50!"
             ];
             let index = 0;
             const messageContainer = document.getElementById('messages');
@@ -176,6 +249,21 @@
             const banners = document.querySelectorAll('.dynamic-offer');
             banners.forEach((banner, i) => {
                 banner.textContent = offers[i % offers.length];
+            });
+
+            // Toggle floating cart
+            const floatingCartBtn = document.getElementById('floatingCartBtn');
+            const floatingCart = document.getElementById('floatingCart');
+
+            floatingCartBtn.addEventListener('click', function() {
+                floatingCart.style.display = floatingCart.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Clear cart functionality
+            document.getElementById('clearCart').addEventListener('click', function() {
+                $.post('${pageContext.request.contextPath}/clear-cart', function() {
+                    location.reload();
+                });
             });
         });
     </script>
