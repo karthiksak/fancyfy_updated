@@ -19,7 +19,7 @@ import java.util.List;
 
 @WebServlet(urlPatterns = { "/products", "/product-detail", "/product-form", "/index", "/add-product",
         "/manage-products", "/delete-product", "/update-quantity", "/add-to-cart", "/view-cart", "/checkout",
-        "/place-order","/order-confirmation", "/clear-cart" })
+        "/place-order","/order-confirmation", "/clear-cart", "/" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
 		maxFileSize = 1024 * 1024 * 10, // 10MB
 		maxRequestSize = 1024 * 1024 * 50) // 50MB
@@ -54,6 +54,7 @@ public class ProductController extends HttpServlet {
 		case "/order-confirmation":
 			orderconfirmation(request, response);
 			break;
+		case "/":
 		case "/products":
 		default:
 			listProducts(request, response);
@@ -115,6 +116,11 @@ public class ProductController extends HttpServlet {
 			throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
 		Product product = productDao.selectProductById(id);
+
+		if (product == null) {
+			response.sendRedirect("products");
+			return;
+		}
 
 		product.setPrice(product.getPrice());
 		request.setAttribute("product", product);
@@ -211,7 +217,9 @@ public class ProductController extends HttpServlet {
 		}
 
 		Product product = productDao.selectProductById(productId);
-		cart.addProduct(product, quantity);
+		if (product != null) {
+			cart.addProduct(product, quantity);
+		}
 
         response.sendRedirect("products");
     }
