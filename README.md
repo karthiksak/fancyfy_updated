@@ -41,4 +41,13 @@ Deploy generated WAR from:
 target/fancyfy-accessories-1.0-SNAPSHOT.war
 ```
 
+### Quick local run (without external Tomcat)
+
+```bash
+cd fashion-jewelry-website
+mvn jetty:run
+```
+
+Then open: `http://localhost:8080/products`
+
 If you run without Oracle DB, the app still works using fallback in-memory data.
