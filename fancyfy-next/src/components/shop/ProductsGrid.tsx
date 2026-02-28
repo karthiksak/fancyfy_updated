@@ -29,15 +29,15 @@ export default function ProductsGrid({ products }: { products: Product[] }) {
             {/* Category Filter Pills */}
             {categories.length > 1 && (
                 <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-                    <div className="container mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
+                    <div className="px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
                         <span className="text-xs text-muted-foreground shrink-0 mr-1">Filter:</span>
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`shrink-0 text-xs font-medium px-4 py-1.5 rounded-full border transition-colors capitalize ${activeCategory === cat
+                                className={`shrink-0 text-xs font-medium px-4 py-2 rounded-full border transition-colors capitalize whitespace-nowrap ${activeCategory === cat
                                         ? "bg-gradient-to-r from-pink-500 to-violet-600 text-white border-transparent"
-                                        : "hover:border-pink-300 hover:bg-pink-50"
+                                        : "hover:border-pink-300 hover:bg-pink-50 bg-white"
                                     }`}
                             >
                                 {cat}
@@ -87,8 +87,8 @@ export default function ProductsGrid({ products }: { products: Product[] }) {
                                         </Link>
                                     </CardHeader>
                                     <CardContent className="p-3 pt-1.5">
-                                        <p className="text-xs text-muted-foreground line-clamp-1 mb-1.5">{product.description}</p>
-                                        <p className="font-bold text-lg text-pink-600">₹{product.price.toLocaleString("en-IN")}</p>
+                                        <p className="hidden sm:block text-xs text-muted-foreground line-clamp-1 mb-1.5">{product.description}</p>
+                                        <p className="font-bold text-base md:text-lg text-pink-600">₹{product.price.toLocaleString("en-IN")}</p>
                                     </CardContent>
                                     <CardFooter className="p-3 pt-0">
                                         <Link href={`/products/${product.id}`} className="w-full">

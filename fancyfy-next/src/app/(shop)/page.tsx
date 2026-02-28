@@ -90,13 +90,13 @@ export default async function HomePage() {
 
             {/* ── Shop by Category (from DB) ── */}
             {categories.length > 0 && (
-                <section className="w-full py-12">
+                <section className="w-full py-10">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <h2 className="text-2xl font-bold mb-6 text-center">Shop by Category</h2>
-                        <div className="flex flex-wrap justify-center gap-3">
+                        <h2 className="text-xl md:text-2xl font-bold mb-5 text-center">Shop by Category</h2>
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x px-1">
                             {categories.map((cat: string) => (
-                                <Link key={cat} href={`/products`}>
-                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border hover:border-pink-300 hover:bg-pink-50 transition-all cursor-pointer capitalize font-medium text-sm">
+                                <Link key={cat} href={`/products`} className="shrink-0 snap-start">
+                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border hover:border-pink-300 hover:bg-pink-50 transition-all cursor-pointer capitalize font-medium text-sm whitespace-nowrap">
                                         {cat}
                                     </div>
                                 </Link>
