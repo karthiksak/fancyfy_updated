@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,23 +20,25 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
-import { deleteProduct } from "@/app/lib/actions";
+import { deleteProduct, toggleProductStock } from "@/app/lib/actions";
 
-export default async function ProductsParams({
+export const dynamic = "force-dynamic";
+
+export default async function ProductsPage({
     searchParams,
 }: {
     searchParams: Promise<{ q?: string }>;
 }) {
     const resolvedParams = await searchParams;
     const query = resolvedParams?.q || "";
+
     const products = await prisma.product.findMany({
         where: {
-            name: {
-                contains: query,
-            },
+            name: { contains: query },
         },
-        orderBy: {
-            createdAt: "desc",
+        orderBy: { createdAt: "desc" },
+        include: {
+            _count: { select: { orderItems: true } },
         },
     });
 
@@ -72,67 +74,84 @@ export default async function ProductsParams({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="hidden w-[100px] sm:table-cell">
-                                    Image
-                                </TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead className="hidden md:table-cell">
-                                    Total Sales
-                                </TableHead>
-                                <TableHead className="hidden md:table-cell">
-                                    Created at
-                                </TableHead>
-                                <TableHead>
-                                    <span className="sr-only">Actions</span>
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="hidden sm:table-cell">
-                                        <img
-                                            alt="Product image"
-                                            className="aspect-square rounded-md object-cover"
-                                            height="64"
-                                            src={JSON.parse(product.images)[0] || "/placeholder.svg"}
-                                            width="64"
-                                        />
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                        {product.name}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                            {product.inStock ? "Active" : "Draft"}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>₹{product.price.toFixed(2)}</TableCell>
-                                    <TableCell className="hidden md:table-cell">
-                                        25
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell">
-                                        {product.createdAt.toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell>
-                                        <form action={deleteProduct.bind(null, product.id)}>
-                                            <Button size="sm" variant="destructive">Delete</Button>
-                                        </form>
-                                    </TableCell>
+                    {products.length === 0 ? (
+                        <p className="text-center text-sm text-muted-foreground py-8">
+                            No products found. Add your first product to get started.
+                        </p>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead className="hidden md:table-cell">Orders</TableHead>
+                                    <TableHead className="hidden md:table-cell">Created</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {products.map((product) => {
+                                    let imgSrc = "/placeholder.svg";
+                                    try { imgSrc = JSON.parse(product.images)[0] || "/placeholder.svg"; } catch { }
+                                    return (
+                                        <TableRow key={product.id}>
+                                            <TableCell className="hidden sm:table-cell">
+                                                <img
+                                                    alt={product.name}
+                                                    className="aspect-square rounded-md object-cover"
+                                                    height="64"
+                                                    src={imgSrc}
+                                                    width="64"
+                                                />
+                                            </TableCell>
+                                            <TableCell className="font-medium max-w-[200px] truncate">
+                                                {product.name}
+                                            </TableCell>
+                                            <TableCell>
+                                                <form action={toggleProductStock.bind(null, product.id)}>
+                                                    <button
+                                                        type="submit"
+                                                        className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold cursor-pointer transition-colors ${product.inStock
+                                                                ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200"
+                                                                : "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
+                                                            }`}
+                                                    >
+                                                        {product.inStock ? "Active" : "Out of Stock"}
+                                                    </button>
+                                                </form>
+                                            </TableCell>
+                                            <TableCell>₹{product.price.toLocaleString("en-IN")}</TableCell>
+                                            <TableCell className="hidden md:table-cell">
+                                                {product._count.orderItems}
+                                            </TableCell>
+                                            <TableCell className="hidden md:table-cell">
+                                                {product.createdAt.toLocaleDateString("en-IN")}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Link href={`/admin/products/${product.id}/edit`}>
+                                                        <Button size="sm" variant="outline" className="h-8 gap-1">
+                                                            <Pencil className="h-3 w-3" />
+                                                            <span className="sr-only sm:not-sr-only">Edit</span>
+                                                        </Button>
+                                                    </Link>
+                                                    <form action={deleteProduct.bind(null, product.id)}>
+                                                        <Button size="sm" variant="destructive" className="h-8">Delete</Button>
+                                                    </form>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
                 <CardFooter>
                     <div className="text-xs text-muted-foreground">
-                        Showing <strong>1-10</strong> of <strong>{products.length}</strong>{" "}
-                        products
+                        Showing <strong>{products.length}</strong> products
                     </div>
                 </CardFooter>
             </Card>

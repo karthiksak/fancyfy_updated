@@ -18,13 +18,36 @@ export default function CartPage() {
     useEffect(() => { setMounted(true); }, []);
     if (!mounted) return null;
 
-    const handleWhatsAppCheckout = () => {
+    const handleWhatsAppCheckout = async () => {
         if (items.length === 0) return;
 
-        // Build the order message
+        // 1. Save order to DB first
+        let orderId = "";
+        try {
+            const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    items: items.map((item) => ({
+                        id: item.id,
+                        price: item.price,
+                        count: item.count,
+                    })),
+                    total: total(),
+                }),
+            });
+            const data = await res.json();
+            if (data.orderId) orderId = data.orderId;
+        } catch (e) {
+            // Continue even if DB save fails — WhatsApp order is still valid
+            console.error("Failed to save order to DB:", e);
+        }
+
+        // 2. Build WhatsApp message
         const lines: string[] = [
             "\uD83D\uDED9\uFE0F *New Order from Fancyfy*",
             "",
+            orderId ? `*Order ID:* ${orderId}` : "",
             "*Order Details:*",
         ];
 
@@ -50,7 +73,7 @@ export default function CartPage() {
         const encodedMessage = encodeURIComponent(message);
         const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
-        // Open WhatsApp, clear cart, show success screen
+        // 3. Open WhatsApp, clear cart, show success
         window.open(waUrl, "_blank");
         clearCart();
         setOrderSent(true);

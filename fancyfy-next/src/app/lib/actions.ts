@@ -27,7 +27,6 @@ export async function authenticate(
         }
         throw error;
     }
-    // Successful login — redirect to the admin dashboard
     redirect("/admin");
 }
 
@@ -53,21 +52,65 @@ export async function createProduct(formData: FormData) {
             price,
             images: JSON.stringify(imageUrls),
             category,
-            inStock: status === "active"
-        }
+            inStock: status === "active",
+        },
     });
 
     revalidatePath("/admin/products");
     redirect("/admin/products");
 }
 
+export async function updateProduct(id: string, formData: FormData) {
+    "use server";
+
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = parseFloat(formData.get("price") as string);
+    const imageUrls = [
+        formData.get("image1") as string,
+        formData.get("image2") as string,
+        formData.get("image3") as string,
+        formData.get("image4") as string,
+    ].filter((url) => url && url.trim() !== "");
+    const category = formData.get("category") as string;
+    const status = formData.get("status") as string;
+
+    await prisma.product.update({
+        where: { id },
+        data: {
+            name,
+            description,
+            price,
+            images: JSON.stringify(imageUrls),
+            category,
+            inStock: status === "active",
+        },
+    });
+
+    revalidatePath("/admin/products");
+    redirect("/admin/products");
+}
+
+export async function toggleProductStock(id: string) {
+    "use server";
+
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) return;
+
+    await prisma.product.update({
+        where: { id },
+        data: { inStock: !product.inStock },
+    });
+
+    revalidatePath("/admin/products");
+}
 
 export async function deleteProduct(id: string) {
     "use server";
     try {
-        await prisma.product.delete({
-            where: { id }
-        });
+        // Delete related order items first
+        await prisma.orderItem.deleteMany({ where: { productId: id } });
+        await prisma.product.delete({ where: { id } });
         revalidatePath("/admin/products");
     } catch (error) {
         throw error;
