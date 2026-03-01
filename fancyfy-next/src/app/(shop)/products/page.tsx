@@ -6,7 +6,12 @@ import ProductsGrid from "@/components/shop/ProductsGrid";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ search?: string }>;
+}) {
+    const { search } = await searchParams;
     const products = await prisma.product.findMany({
         where: { inStock: true },
         orderBy: { createdAt: "desc" },
@@ -25,7 +30,7 @@ export default async function ProductsPage() {
                         <Sparkles className="w-3 h-3" /> Curated Collection
                     </span>
                     <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-white via-pink-200 to-violet-300">
-                        All Products
+                        {search ? `Results for "${search}"` : "All Products"}
                     </h1>
                     <p className="text-gray-400 text-sm">{products.length} pieces available</p>
                 </div>
@@ -44,7 +49,7 @@ export default async function ProductsPage() {
                 </div>
             ) : (
                 <div className="flex-1 bg-gray-50">
-                    <ProductsGrid products={products} />
+                    <ProductsGrid products={products} searchQuery={search || ""} />
                 </div>
             )}
 

@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag, User } from "lucide-react";
+import { ShoppingBag, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store";
+import { useWishlistStore } from "@/lib/wishlist-store";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import SearchBar from "@/components/shop/SearchBar";
 
 export function Navbar() {
     const items = useCartStore((state) => state.items);
+    const wishlistItems = useWishlistStore((state) => state.items);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
@@ -28,12 +31,31 @@ export function Navbar() {
                     <Link href="/products" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                         Products
                     </Link>
+                    <Link href="/wishlist" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                        Wishlist
+                    </Link>
                 </nav>
 
                 {/* Right actions */}
                 <div className="flex items-center gap-1">
+                    {/* Search */}
+                    <SearchBar />
+
                     {/* Dark / Light toggle */}
                     <ThemeToggle />
+
+                    {/* Wishlist */}
+                    <Link href="/wishlist">
+                        <Button variant="ghost" size="icon" className="relative">
+                            <Heart className="h-5 w-5" />
+                            {mounted && wishlistItems.length > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-pink-500 text-[10px] font-bold text-white flex items-center justify-center">
+                                    {wishlistItems.length}
+                                </span>
+                            )}
+                            <span className="sr-only">Wishlist</span>
+                        </Button>
+                    </Link>
 
                     {/* Cart */}
                     <Link href="/cart">
